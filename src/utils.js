@@ -1,5 +1,7 @@
+/* eslint-disable prefer-let/prefer-let */
 const fs = require('fs')
 const postcss = require('postcss')
+const lessParser = require('postcss-less')
 
 const constant = require('./constant')
 
@@ -98,19 +100,33 @@ function parseColor (value) {
   return { type: constant.COLOR_TYPE.NOT_COLOR }
 }
 
-async function parseVar (files) {
-  for (const file of files) {
-    const css = await promise(fs.readFile)(file)
-    const root = postcss.parse(css)
-    root.walkAtRules((node) => {
+function getColorId (color) {
+  return `${ color.r }-${ color.g }-${ color.b }-${ color.a }`
+}
 
+async function getColorMapFromFiles (files) {
+  const colorToVariable = {}
+  for (const file of files) {
+    const css = await promise(fs.readFile)(file, { encoding: 'utf-8' })
+    const root = lessParser.parse(css)
+    root.walkAtRules((node) => {
+      const color = parseColor(node.params)
+      if (color.type === constant.COLOR_TYPE.NOT_COLOR) {
+        return
+      }
+
+      color.param = node.params
+      color.name = node.name
+      colorToVariable[getColorId(color)] = color
     })
   }
 
+  return colorToVariable
 }
 
 module.exports = {
   promise,
-  parseVar,
-  parseColor
+  getColorMapFromFiles,
+  parseColor,
+  getColorId
 }

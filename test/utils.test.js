@@ -1,4 +1,6 @@
+/* eslint-disable prefer-let/prefer-let */
 const path = require('path')
+
 const utils = require('../src/utils')
 const constant = require('../src/constant')
 
@@ -82,6 +84,40 @@ describe('test parseColor', () => {
   })
 })
 
-// it('test', () => {
-//   utils.parseVar([path.resolve(__dirname, './color-var.less')])
-// })
+describe('test getColorId', () => {
+  it('should return right color id', () => {
+    expect(utils.getColorId({
+      type: constant.COLOR_TYPE.RGBA,
+      r: 1,
+      g: 2,
+      b: 3,
+      a: 0.1
+    })).toBe('1-2-3-0.1')
+  })
+})
+
+describe('test getColorMapFromFiles', () => {
+  it('test', async () => {
+    const colorToVar = await utils.getColorMapFromFiles([path.resolve(__dirname, './less/color-var.less')])
+    expect(colorToVar).toEqual({
+      '0-170-17-1': {
+        type: constant.COLOR_TYPE.SHORTCUT_HEX,
+        r: 0,
+        g: 170,
+        b: 17,
+        a: 1,
+        name: 'short-hex',
+        param: '#0a1'
+      },
+      '66-139-202-0.1': {
+        type: constant.COLOR_TYPE.RGBA,
+        r: 66,
+        g: 139,
+        b: 202,
+        a: 0.1,
+        name: 'link-color',
+        param: 'rgba(66, 139, 202, 0.1)'
+      }
+    })
+  })
+})
