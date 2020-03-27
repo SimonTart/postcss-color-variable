@@ -28,11 +28,15 @@ function isValidAlpha (v) {
 }
 
 function parseColor (value) {
+  let color = {
+    type: constant.COLOR_TYPE.NOT_COLOR
+  }
+
   if (/^#[0-9a-fA-F]{3}$/g.test(value)) {
     let rgbArr = value.slice(1).split('').map(hexValue => {
       return Number.parseInt(hexValue.repeat(2), 16)
     })
-    return {
+    color = {
       type: constant.COLOR_TYPE.SHORTCUT_HEX,
       r: rgbArr[0],
       g: rgbArr[1],
@@ -45,7 +49,7 @@ function parseColor (value) {
     let rgbArr = Array.from(value.match(/[0-9a-fA-F]{2}/g)).map(hexValue => {
       return Number.parseInt(hexValue, 16)
     })
-    return {
+    color = {
       type: constant.COLOR_TYPE.HEX,
       r: rgbArr[0],
       g: rgbArr[1],
@@ -59,16 +63,12 @@ function parseColor (value) {
     let matches = Array.from(value.match(/\d{1,3}/g))
     let matchValues = matches.map(match => Number.parseInt(match, 10))
     if (matchValues.every(isValidRgbUnit)) {
-      return {
+      color = {
         type: constant.COLOR_TYPE.RGB,
         r: matchValues[0],
         g: matchValues[1],
         b: matchValues[2],
         a: 1
-      }
-    } else {
-      return {
-        type: constant.COLOR_TYPE.NOT_COLOR
       }
     }
   }
@@ -83,30 +83,37 @@ function parseColor (value) {
       rgbValues.every(isValidRgbUnit) &&
       isValidAlpha(alphaValue)
     ) {
-      return {
+      color = {
         type: constant.COLOR_TYPE.RGBA,
         r: rgbValues[0],
         g: rgbValues[1],
         b: rgbValues[2],
         a: alphaValue
       }
-    } else {
-      return {
-        type: constant.COLOR_TYPE.NOT_COLOR
-      }
     }
   }
 
-  return { type: constant.COLOR_TYPE.NOT_COLOR }
+  appendId(color)
+
+  return color
 }
 
-function getColorId (color) {
-  return `${ color.r }-${ color.g }-${ color.b }-${ color.a }`
+function getColorId (r, g, b, a) {
+  return `${ r }-${ g }-${ b }-${ a }`
+}
+
+function appendId (color) {
+  color.id = getColorId(color.r, color.g, color.b, color.a)
+  return color
 }
 
 async function getColorMapFromFiles (files) {
   const colorToVariable = {}
   for (const file of files) {
+    if (!fs.existsSync(file)) {
+      continue
+    }
+
     const css = await promise(fs.readFile)(file, { encoding: 'utf-8' })
     const root = lessParser.parse(css)
     root.walkAtRules((node) => {
@@ -117,7 +124,7 @@ async function getColorMapFromFiles (files) {
 
       color.param = node.params
       color.name = node.name
-      colorToVariable[getColorId(color)] = color
+      colorToVariable[color.id] = color
     })
   }
 
@@ -128,5 +135,6 @@ module.exports = {
   promise,
   getColorMapFromFiles,
   parseColor,
-  getColorId
+  getColorId,
+  appendId
 }
