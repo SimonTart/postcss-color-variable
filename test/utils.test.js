@@ -105,7 +105,7 @@ describe('test appenId', () => {
 
 describe('test getColorMapFromFiles', () => {
   it('should return right map', async () => {
-    const colorToVar = await utils.getColorMapFromFiles([path.resolve(__dirname, './less/color-var.less')])
+    const colorToVar = utils.getColorMapFromFiles([path.resolve(__dirname, './less/color-var.less')])
     const rightColors = [{
       type: constant.COLOR_TYPE.SHORTCUT_HEX,
       r: 0,
@@ -133,7 +133,7 @@ describe('test getColorMapFromFiles', () => {
   })
 
   it('should return empty when file not exist', async () => {
-    const colorToVar = await utils.getColorMapFromFiles([path.resolve(__dirname, './less/empty.less')])
+    const colorToVar = utils.getColorMapFromFiles([path.resolve(__dirname, './less/empty.less')])
     expect(colorToVar).toEqual({})
   })
 })

@@ -1,23 +1,8 @@
 /* eslint-disable prefer-let/prefer-let */
 const fs = require('fs')
-const postcss = require('postcss')
 const lessParser = require('postcss-less')
 
 const constant = require('./constant')
-
-function promise (fn) {
-  return function (...args) {
-    return new Promise((resolve, reject) => {
-      fn(...args, (error, data) => {
-        if (error) {
-          reject(error)
-        } else {
-          resolve(data)
-        }
-      })
-    })
-  }
-}
 
 function isValidRgbUnit (v) {
   return v >= 0 && v <= 255
@@ -107,21 +92,20 @@ function appendId (color) {
   return color
 }
 
-async function getColorMapFromFiles (files) {
+function getColorMapFromFiles (files) {
   const colorToVariable = {}
   for (const file of files) {
     if (!fs.existsSync(file)) {
       continue
     }
 
-    const css = await promise(fs.readFile)(file, { encoding: 'utf-8' })
+    const css = fs.readFileSync(file, { encoding: 'utf-8' })
     const root = lessParser.parse(css)
     root.walkAtRules((node) => {
       const color = parseColor(node.params)
       if (color.type === constant.COLOR_TYPE.NOT_COLOR) {
         return
       }
-
       color.param = node.params
       color.name = node.name
       colorToVariable[color.id] = color
@@ -132,7 +116,6 @@ async function getColorMapFromFiles (files) {
 }
 
 module.exports = {
-  promise,
   getColorMapFromFiles,
   parseColor,
   getColorId,
