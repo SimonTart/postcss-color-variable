@@ -1,5 +1,6 @@
 let postcss = require('postcss')
 let path = require('path')
+
 let plugin = require('../src/index')
 
 async function run (input, output, opts) {
@@ -8,8 +9,9 @@ async function run (input, output, opts) {
   expect(result.warnings()).toHaveLength(0)
 }
 
-it('should replace right', async () => {
-  await run(`
+describe('test postcss plugin', () => {
+  it('should replace right', async () => {
+    await run(`
 a {
   color: red;
   background: #0a1;
@@ -21,7 +23,7 @@ a {
   }
 }
     `,
-    `
+      `
 a {
   color: red;
   background: @short-hex;
@@ -33,4 +35,5 @@ a {
   }
 }
     `, { variables: [path.resolve(__dirname, './less/color-var.less')] })
+  })
 })

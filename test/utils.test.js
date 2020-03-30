@@ -106,23 +106,24 @@ describe('test appenId', () => {
 describe('test getColorMapFromFiles', () => {
   it('should return right map', async () => {
     const colorToVar = utils.getColorMapFromFiles([path.resolve(__dirname, './less/color-var.less')])
-    const rightColors = [{
-      type: constant.COLOR_TYPE.SHORTCUT_HEX,
-      r: 0,
-      g: 170,
-      b: 17,
-      a: 1,
-      name: 'short-hex',
-      param: '#0a1'
-    }, {
-      type: constant.COLOR_TYPE.RGBA,
-      r: 66,
-      g: 139,
-      b: 202,
-      a: 0.1,
-      name: 'link-color',
-      param: 'rgba(66, 139, 202, 0.1)'
-    }]
+    const rightColors = [
+      {
+        type: constant.COLOR_TYPE.SHORTCUT_HEX,
+        r: 0,
+        g: 170,
+        b: 17,
+        a: 1,
+        name: 'short-hex',
+        param: '#0a1'
+      }, {
+        type: constant.COLOR_TYPE.RGBA,
+        r: 66,
+        g: 139,
+        b: 202,
+        a: 0.1,
+        name: 'link-color',
+        param: 'rgba(66, 139, 202, 0.1)'
+      }]
     const result = rightColors.reduce((map, color) => {
       const c = utils.appendId(color)
       map[c.id] = c
@@ -135,5 +136,58 @@ describe('test getColorMapFromFiles', () => {
   it('should return empty when file not exist', async () => {
     const colorToVar = utils.getColorMapFromFiles([path.resolve(__dirname, './less/empty.less')])
     expect(colorToVar).toEqual({})
+  })
+})
+
+describe('test replaceColor', () => {
+  const colorBasic = [
+    {
+      type: constant.COLOR_TYPE.SHORTCUT_HEX,
+      r: 0,
+      g: 170,
+      b: 17,
+      a: 1,
+      name: 'short-hex-color',
+      param: '#0a1'
+    },{
+      type: constant.COLOR_TYPE.HEX,
+      r: 255,
+      g: 255,
+      b: 255,
+      a: 1,
+      name: 'white',
+      param: '#ffffff'
+    }, {
+      type: constant.COLOR_TYPE.RGBA,
+      r: 66,
+      g: 139,
+      b: 202,
+      a: 0.1,
+      name: 'rgba-color',
+      param: 'rgba(66, 139, 202, 0.1)'
+    },
+    {
+      type: constant.COLOR_TYPE.RGBA,
+      r: 66,
+      g: 139,
+      b: 202,
+      a: 1,
+      name: 'rgb-color',
+      param: 'rgb(66, 139, 202)'
+    }
+  ]
+  const colorToVar = colorBasic.reduce((map, color) => {
+    const c = utils.appendId(color)
+    map[c.id] = c
+    return map
+  }, {})
+
+  it('should replace success', () => {
+    expect(utils.replaceColor('solid 1px #0a1', colorToVar)).toBe('solid 1px @short-hex-color')
+    expect(utils.replaceColor('solid 1px #ffffff', colorToVar)).toBe('solid 1px @white')
+    expect(utils.replaceColor('solid 1px rgba(66, 139, 202, 0.1)', colorToVar)).toBe('solid 1px @rgba-color')
+    expect(utils.replaceColor('solid 1px rgb(66, 139, 202)', colorToVar)).toBe('solid 1px @rgb-color')
+    expect(utils.replaceColor('linear-gradient(#0a1 0%, #ffffff 100%)', colorToVar)).toBe('linear-gradient(@short-hex-color 0%, @white 100%)')
+    expect(utils.replaceColor('linear-gradient(#000 0%, #ffffff 100%)', colorToVar)).toBe('linear-gradient(#000 0%, @white 100%)')
   })
 })
