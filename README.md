@@ -36,7 +36,7 @@ or `postcss` in bundle config.
 ```diff
 module.exports = {
   plugins: [
-+   require('postcss-color-variable', { color}),
++   require('postcss-color-variable'),
   ]
 }
 ```
