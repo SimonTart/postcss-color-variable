@@ -8,6 +8,7 @@ module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
   const varFiles = opts.variables || []
 
   const colorToVar = utils.getColorMapFromFiles(varFiles)
+  console.log(colorToVar)
 
   return (root, result) => {
     root.walkDecls(decl => {
@@ -16,11 +17,10 @@ module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
         return
       }
 
-      const colorVar = colorToVar[color.id]
-
-      if (colorVar && colorVar.name) {
+      const newValue = utils.replaceColor(decl.value, colorToVar)
+      if (newValue !== decl.value) {
         const newDecl = decl.clone()
-        newDecl.value = `@${ colorVar.name }`
+        newDecl.value = newValue
         decl.replaceWith(newDecl)
       }
     })
