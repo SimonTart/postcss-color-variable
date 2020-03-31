@@ -1,39 +1,53 @@
 # PostCSS Color Variable
 
-[PostCSS] plugin color variable.
+[PostCSS] plugin color variable. Replace color value with color variable name
 
 [PostCSS]: https://github.com/postcss/postcss
-
-```css
-.foo {
-    /* Input example */
-}
+color variable definition file
+```less
+@link-color: #0a1;
 ```
 
+input less file
+```less
+.foo {
+    color: #0a1;
+}
+```
+output less file
 ```css
 .foo {
-  /* Output example */
+  color: @link-color;
 }
 ```
 
 ## Usage
 
+Install plugin
+```bash
+npm install postcss-color-variable --save-dev
+```
+
+If you already use PostCSS, add the plugin to plugins list:
 Check you project for existed PostCSS config: `postcss.config.js`
 in the project root, `"postcss"` section in `package.json`
 or `postcss` in bundle config.
 
-If you already use PostCSS, add the plugin to plugins list:
-
 ```diff
 module.exports = {
   plugins: [
-+   require('postcss-color-variable'),
-    require('autoprefixer')
++   require('postcss-color-variable', { color}),
   ]
 }
 ```
 
-If you do not use PostCSS, add it according to [official docs]
-and set this plugin in settings.
+## Options
+```js
+{
+  variables: ['/test/color.less'] // color definition file absolute path
+}
+```
 
-[official docs]: https://github.com/postcss/postcss#usage
+## Support
+only support Less
+
