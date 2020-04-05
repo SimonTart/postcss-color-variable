@@ -1,6 +1,6 @@
 {
   "name": "postcss-color-variable",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "PostCSS plugin color variable",
   "keywords": [
     "postcss",
@@ -14,7 +14,7 @@
     "test": "jest"
   },
   "main": "./src/index.js",
-  "author": "zengxuebing <zengxuebing.94@bytedance.com>",
+  "author": "zengxb94@foxmail.com",
   "license": "MIT",
   "repository": "111/postcss-color-variable",
   "dependencies": {

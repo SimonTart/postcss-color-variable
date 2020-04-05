@@ -5,3 +5,4 @@ yarn.lock
 .travis.yml
 .editorconfig
 **/.idea
+.vscode
