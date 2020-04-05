@@ -13,6 +13,7 @@
     "lint": "jest && eslint .",
     "test": "jest"
   },
+  "main": "./src/index.js",
   "author": "zengxuebing <zengxuebing.94@bytedance.com>",
   "license": "MIT",
   "repository": "111/postcss-color-variable",

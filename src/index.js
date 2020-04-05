@@ -10,7 +10,7 @@ module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
   const colorToVar = utils.getColorMapFromFiles(varFiles)
   console.log(colorToVar)
 
-  return (root, result) => {
+  return root => {
     root.walkDecls(decl => {
       const color = utils.parseColor(decl.value)
       if (color.type === constant.COLOR_TYPE.NOT_COLOR) {
