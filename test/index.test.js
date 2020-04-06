@@ -36,4 +36,21 @@ a {
 }
     `, { variables: [path.resolve(__dirname, './less/color-var.less')] })
   })
+
+  it('should have warning', async () => {
+    let result = await postcss(
+      [
+        plugin({
+          variables: [path.resolve(__dirname, './less/color-var.less')]
+        })
+      ]
+    ).process(
+      `
+        .a {
+          color: #000;
+        }
+      `
+      , { from: undefined })
+    expect(result.warnings()[0].text).toBe('找不到对应颜色变量')
+  })
 })
