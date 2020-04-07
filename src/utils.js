@@ -152,6 +152,8 @@ function getColorMapFromFiles (files) {
 }
 
 function replaceColor (value, colorToVar) {
+  let notFoundColors = []
+  let isMatchColor = false
   for (const replaceRegExp of [ColorRegExp.ShortcutHexReplace, ColorRegExp.HexReplace, ColorRegExp.RGBReplace, ColorRegExp.RGBAReplace]) {
     value = value.replace(replaceRegExp, (match, p1, p2, p3) => {
       const color = parseColor(p2)
@@ -159,16 +161,21 @@ function replaceColor (value, colorToVar) {
         return p1 + p2 + p3
       }
 
+      isMatchColor = true
       const colorVar = colorToVar[color.id]
       if (colorVar && colorVar.name) {
         return p1 + `@${ colorVar.name }` + p3
       }
-
+      notFoundColors.push(p2)
       return p1 + p2 + p3
     })
   }
 
-  return value
+  return {
+    value,
+    notFoundColors,
+    isMatchColor
+  }
 }
 
 module.exports = {

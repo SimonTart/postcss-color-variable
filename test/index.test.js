@@ -31,7 +31,7 @@ a {
   b {
     color: blue;
     background: @link-color;
-    border: 1px solid #0a1;
+    border: 1px solid @short-hex;
   }
 }
     `, { variables: [path.resolve(__dirname, './less/color-var.less')] })
@@ -47,10 +47,10 @@ a {
     ).process(
       `
         .a {
-          color: #000;
+          background: linear-gradient(#aaa 0%, #bbb 100%);
         }
       `
       , { from: undefined })
-    expect(result.warnings()[0].text).toBe('找不到对应颜色变量')
+    expect(result.warnings()[0].text).toBe('[#aaa,#bbb]找不到对应颜色变量')
   })
 })

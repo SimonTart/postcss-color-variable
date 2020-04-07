@@ -149,7 +149,7 @@ describe('test replaceColor', () => {
       a: 1,
       name: 'short-hex-color',
       param: '#0a1'
-    },{
+    }, {
       type: constant.COLOR_TYPE.HEX,
       r: 255,
       g: 255,
@@ -183,11 +183,49 @@ describe('test replaceColor', () => {
   }, {})
 
   it('should replace success', () => {
-    expect(utils.replaceColor('solid 1px #0a1', colorToVar)).toBe('solid 1px @short-hex-color')
-    expect(utils.replaceColor('solid 1px #ffffff', colorToVar)).toBe('solid 1px @white')
-    expect(utils.replaceColor('solid 1px rgba(66, 139, 202, 0.1)', colorToVar)).toBe('solid 1px @rgba-color')
-    expect(utils.replaceColor('solid 1px rgb(66, 139, 202)', colorToVar)).toBe('solid 1px @rgb-color')
-    expect(utils.replaceColor('linear-gradient(#0a1 0%, #ffffff 100%)', colorToVar)).toBe('linear-gradient(@short-hex-color 0%, @white 100%)')
-    expect(utils.replaceColor('linear-gradient(#000 0%, #ffffff 100%)', colorToVar)).toBe('linear-gradient(#000 0%, @white 100%)')
+    expect(utils.replaceColor('solid 1px #0a1', colorToVar)).toEqual({
+      value: 'solid 1px @short-hex-color',
+      notFoundColors: [],
+      isMatchColor: true
+    })
+    expect(utils.replaceColor('solid 1px #ffffff', colorToVar)).toEqual({
+      value: 'solid 1px @white',
+      notFoundColors: [],
+      isMatchColor: true
+    })
+    expect(utils.replaceColor('solid 1px rgba(66, 139, 202, 0.1)', colorToVar)).toEqual({
+      value: 'solid 1px @rgba-color',
+      notFoundColors: [],
+      isMatchColor: true
+    })
+    expect(utils.replaceColor('solid 1px rgb(66, 139, 202)', colorToVar)).toEqual({
+      value: 'solid 1px @rgb-color',
+      notFoundColors: [],
+      isMatchColor: true
+    })
+    expect(utils.replaceColor('linear-gradient(#0a1 0%, #ffffff 100%)', colorToVar))
+      .toEqual({
+        value: 'linear-gradient(@short-hex-color 0%, @white 100%)',
+        notFoundColors: [],
+        isMatchColor: true
+      })
+    expect(utils.replaceColor('linear-gradient(#000 0%, #ffffff 100%)', colorToVar))
+      .toEqual({
+        value: 'linear-gradient(#000 0%, @white 100%)',
+        notFoundColors: ['#000'],
+        isMatchColor: true
+      })
+    expect(utils.replaceColor('linear-gradient(#aaa 0%, #bbb 100%)', colorToVar))
+      .toEqual({
+        value: 'linear-gradient(#aaa 0%, #bbb 100%)',
+        notFoundColors: ['#aaa', '#bbb'],
+        isMatchColor: true,
+      })
+    expect(utils.replaceColor('blue', colorToVar))
+      .toEqual({
+        value: 'blue',
+        notFoundColors: [],
+        isMatchColor: false
+      })
   })
 })

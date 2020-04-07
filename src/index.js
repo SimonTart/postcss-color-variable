@@ -11,18 +11,19 @@ module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
 
   return (root, result) => {
     root.walkDecls(decl => {
-      const color = utils.parseColor(decl.value)
-      if (color.type === constant.COLOR_TYPE.NOT_COLOR) {
+      const replaceResult = utils.replaceColor(decl.value, colorToVar)
+
+      if (replaceResult.type === constant.COLOR_TYPE.NOT_COLOR) {
         return
       }
 
-      const newValue = utils.replaceColor(decl.value, colorToVar)
-      if (newValue !== decl.value) {
+      if (replaceResult.value !== decl.value) {
         const newDecl = decl.clone()
-        newDecl.value = newValue
+        newDecl.value = replaceResult.value
         decl.replaceWith(newDecl)
-      } else {
-        decl.warn(result, '找不到对应颜色变量')
+      }
+      if (replaceResult.isMatchColor && replaceResult.notFoundColors.length > 0) {
+        decl.warn(result, `[${ replaceResult.notFoundColors.join(',') }]找不到对应颜色变量`)
       }
     })
   }
