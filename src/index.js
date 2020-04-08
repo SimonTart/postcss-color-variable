@@ -6,12 +6,13 @@ const constant = require('./constant')
 
 module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
   const varFiles = opts.variables || []
+  const syntax = opts.syntax || constant.Syntax.CSS
 
   const colorToVar = utils.getColorMapFromFiles(varFiles)
 
   return (root, result) => {
     root.walkDecls(decl => {
-      const replaceResult = utils.replaceColor(decl.value, colorToVar)
+      const replaceResult = utils.replaceColor(decl.value, colorToVar, syntax)
 
       if (replaceResult.type === constant.COLOR_TYPE.NOT_COLOR) {
         return

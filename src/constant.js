@@ -5,3 +5,8 @@ module.exports.COLOR_TYPE = {
   RGBA: 'RGBA',
   NOT_COLOR: 'NOT_COLOR'
 }
+
+module.exports.Syntax = {
+  CSS: 'CSS',
+  LESS: 'LESS'
+}

@@ -1,4 +1,4 @@
-/* eslint-disable prefer-let/prefer-let */
+/* eslint-disable prefer-let/prefer-let, consistent-return */
 const fs = require('fs')
 const lessParser = require('postcss-less')
 
@@ -151,7 +151,27 @@ function getColorMapFromFiles (files) {
   return colorToVariable
 }
 
-function replaceColor (value, colorToVar) {
+function dealFade (p1, p2, p3, color, colorToVar, syntax) {
+  if (color.a === 1) {
+    return
+  }
+
+  const notAlphaId = getColorId(color.r, color.g, color.b, 1)
+  const notAlphaColorVar = colorToVar[notAlphaId]
+
+  if (!notAlphaColorVar || !notAlphaColorVar.name) {
+    return
+  }
+
+  switch (syntax) {
+    case constant.Syntax.CSS:
+      return
+    case constant.Syntax.LESS:
+      return p1 + `fade(@${ notAlphaColorVar.name }, ${ color.a * 100 }%)` + p3
+  }
+}
+
+function replaceColor (value, colorToVar, syntax) {
   let notFoundColors = []
   let isMatchColor = false
   for (const replaceRegExp of [ColorRegExp.ShortcutHexReplace, ColorRegExp.HexReplace, ColorRegExp.RGBReplace, ColorRegExp.RGBAReplace]) {
@@ -166,6 +186,11 @@ function replaceColor (value, colorToVar) {
       if (colorVar && colorVar.name) {
         return p1 + `@${ colorVar.name }` + p3
       }
+      const fadeValue = dealFade(p1, p2, p3, color, colorToVar, syntax)
+      if (fadeValue) {
+        return fadeValue
+      }
+
       notFoundColors.push(p2)
       return p1 + p2 + p3
     })
@@ -183,5 +208,6 @@ module.exports = {
   parseColor,
   getColorId,
   appendId,
-  replaceColor
+  replaceColor,
+  dealFade,
 }

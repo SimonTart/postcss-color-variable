@@ -139,6 +139,21 @@ describe('test getColorMapFromFiles', () => {
   })
 })
 
+describe('test dealFade', () => {
+  it('should return new value', () => {
+    const colorToVar = utils.getColorMapFromFiles([path.resolve(__dirname, './less/color-var.less')])
+    const color = utils.parseColor('rgba(0, 170, 17, 0.1)')
+    expect(utils.dealFade('solid 1px ', 'rgba(0, 170, 17, 0.1)', '', color, colorToVar, constant.Syntax.LESS)).toBe('solid 1px fade(@short-hex, 10%)')
+  })
+
+  it('should return undefined', () => {
+    const colorToVar = utils.getColorMapFromFiles([path.resolve(__dirname, './less/color-var.less')])
+    const color = utils.parseColor('#bbb')
+    expect(utils.dealFade('solid 1px ', '#bbb', '', color, colorToVar, constant.Syntax.LESS)).toBe(undefined)
+    expect(utils.dealFade('solid 1px ', 'rgba(0, 170, 17, 1)', '', color, colorToVar, constant.Syntax.LESS)).toBe(undefined)
+  })
+})
+
 describe('test replaceColor', () => {
   const colorBasic = [
     {
@@ -219,8 +234,18 @@ describe('test replaceColor', () => {
       .toEqual({
         value: 'linear-gradient(#aaa 0%, #bbb 100%)',
         notFoundColors: ['#aaa', '#bbb'],
-        isMatchColor: true,
+        isMatchColor: true
       })
+    expect(utils.replaceColor('solid 1px rgba(255,255,255,0.1)', colorToVar, constant.Syntax.LESS)).toEqual({
+      value: 'solid 1px fade(@white, 10%)',
+      notFoundColors: [],
+      isMatchColor: true
+    })
+    expect(utils.replaceColor('solid 1px rgba(0,0,0,0.1)', colorToVar, constant.Syntax.LESS)).toEqual({
+      value: 'solid 1px rgba(0,0,0,0.1)',
+      notFoundColors: ['rgba(0,0,0,0.1)'],
+      isMatchColor: true
+    })
     expect(utils.replaceColor('blue', colorToVar))
       .toEqual({
         value: 'blue',
