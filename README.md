@@ -44,7 +44,7 @@ module.exports = {
 ## Options
 ```js
 {
-  variables: ['/test/color.less'] // color definition file absolute path
+  variableFiles: ['/test/color.less'] // color definition file absolute path
 }
 ```
 
