@@ -1,8 +1,8 @@
 /* eslint-disable prefer-let/prefer-let */
 const postcss = require('postcss')
-
 const utils = require('./utils')
 const constant = require('./constant')
+
 
 module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
   const varFiles = opts.variables || []

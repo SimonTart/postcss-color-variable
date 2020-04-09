@@ -1,10 +1,11 @@
 let postcss = require('postcss')
 let path = require('path')
+const lessSyntax = require('postcss-less')
 
 let plugin = require('../src/index')
 
 async function run (input, output, opts) {
-  let result = await postcss([plugin(opts)]).process(input, { from: undefined })
+  let result = await postcss([plugin(opts)]).process(input, { from: undefined, syntax: lessSyntax })
   expect(result.content).toBe(output)
   expect(result.warnings()).toHaveLength(0)
 }
@@ -47,10 +48,11 @@ a {
     ).process(
       `
         .a {
+          .c();
           background: linear-gradient(#aaa 0%, #bbb 100%);
         }
       `
-      , { from: undefined })
+      , { from: undefined, syntax: lessSyntax })
     expect(result.warnings()[0].text).toBe('[#aaa,#bbb]找不到对应颜色变量')
   })
 })

@@ -209,5 +209,5 @@ module.exports = {
   getColorId,
   appendId,
   replaceColor,
-  dealFade,
+  dealFade
 }
