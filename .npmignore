@@ -6,3 +6,5 @@ yarn.lock
 .editorconfig
 **/.idea
 .vscode
+test/
+.colorvarrc.json
