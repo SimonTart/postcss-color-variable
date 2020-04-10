@@ -15,7 +15,7 @@ const DefaultConfig = {
 const explorerSync = cosmiconfigSync(ConfigFileName)
 
 function resolveFileConfig () {
-  const result = explorerSync.search()
+  const result = explorerSync.search(__dirname)
   if (!result) {
     return {}
   }
