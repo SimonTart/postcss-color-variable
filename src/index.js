@@ -6,13 +6,15 @@ const path = require('path')
 const utils = require('./utils')
 const constant = require('./constant')
 
+const ConfigFileName = 'colorvar'
+
 function getConfig (opts) {
-  const config = rc('colorvariable', opts) || {}
+  const config = rc(ConfigFileName, opts) || {}
   let configFolder
   if (config.config) {
-    configFolder = config.config.split('.colorvariable')[0]
+    configFolder = config.config.split(`.${ ConfigFileName }`)[0]
   }
-  console.log(config)
+
   const variableFiles = (config.variableFiles || []).map(filePath => {
     if (path.isAbsolute(filePath)) {
       return filePath

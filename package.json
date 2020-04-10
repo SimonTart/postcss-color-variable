@@ -1,6 +1,6 @@
 {
   "name": "postcss-color-variable",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "PostCSS plugin color variable",
   "keywords": [
     "postcss",
