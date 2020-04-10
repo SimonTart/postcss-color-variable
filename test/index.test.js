@@ -59,7 +59,7 @@ a {
         from: undefined,
         syntax: lessSyntax
       })
-    expect(result.warnings()[0].text).toBe('[#aaa,#bbb]找不到对应颜色变量')
+    expect(result.warnings()[0].text).toBe('#aaa,#bbb 找不到对应颜色变量')
   })
 
   it('should replace right when using rc config', async () => {
@@ -76,6 +76,6 @@ a {
   color: red;
   background: @short-hex;
 }
-    ` )
+    `)
   })
 })

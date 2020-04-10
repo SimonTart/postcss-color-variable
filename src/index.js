@@ -1,39 +1,53 @@
 /* eslint-disable prefer-let/prefer-let */
 const postcss = require('postcss')
-const rc = require('rc')
+const { cosmiconfigSync } = require('cosmiconfig')
 const path = require('path')
 
 const utils = require('./utils')
 const constant = require('./constant')
 
 const ConfigFileName = 'colorvar'
+const DefaultConfig = {
+  variableFiles: [],
+  syntax: 'css'
+}
+
+const explorerSync = cosmiconfigSync(ConfigFileName)
+
+function resolveFileConfig () {
+  const result = explorerSync.search()
+  if (!result) {
+    return {}
+  }
+
+  if (result.config && result.config.variableFiles) {
+    return Object.assign({}, result.config, {
+      variableFiles: result.config.variableFiles.map(filePath => {
+        if (path.isAbsolute(filePath)) {
+          return filePath
+        }
+
+        if (result.filepath) {
+          const fileFolder = path.dirname(result.filepath);
+          return path.resolve(fileFolder, filePath)
+        }
+
+        return filePath
+      })
+    })
+  }
+
+  return result.config || {}
+}
 
 function getConfig (opts) {
-  const config = rc(ConfigFileName, opts) || {}
-  let configFolder
-  if (config.config) {
-    configFolder = config.config.split(`.${ ConfigFileName }`)[0]
-  }
-
-  const variableFiles = (config.variableFiles || []).map(filePath => {
-    if (path.isAbsolute(filePath)) {
-      return filePath
-    }
-    if (configFolder) {
-      return path.resolve(configFolder, filePath)
-    }
-    return filePath
-  })
-
-  return {
-    ...config,
-    variableFiles
-  }
+  const fileConfig = resolveFileConfig()
+  return Object.assign({}, DefaultConfig, fileConfig, opts)
 }
 
 module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
   const config = getConfig(opts)
-  const syntax = config.syntax || constant.Syntax.CSS
+  const syntax = config.syntax
 
   const colorToVar = utils.getColorMapFromFiles(config.variableFiles)
 
@@ -51,7 +65,7 @@ module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
         decl.replaceWith(newDecl)
       }
       if (replaceResult.isMatchColor && replaceResult.notFoundColors.length > 0) {
-        decl.warn(result, `[${ replaceResult.notFoundColors.join(',') }]找不到对应颜色变量`)
+        decl.warn(result, `${ replaceResult.notFoundColors.join(',') } 找不到对应颜色变量`)
       }
     })
   }
