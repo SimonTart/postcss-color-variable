@@ -48,7 +48,6 @@ function getConfig (opts) {
 module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
   const config = getConfig(opts)
   const syntax = config.syntax
-  console.log(config)
 
   const colorToVar = utils.getColorMapFromFiles(config.variableFiles)
 

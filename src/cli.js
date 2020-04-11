@@ -18,8 +18,9 @@ function run (args) {
     console.error('必须指定一个文件')
     process.exit(1)
   }
-
-  filePath = path.resolve(process.cwd(), filePath);
+  if (!path.isAbsolute(filePath)) {
+    filePath = path.resolve(process.cwd(), filePath)
+  }
 
   if (!fs.existsSync(filePath)) {
     console.error(`${ filePath } 不存在`)
@@ -33,14 +34,13 @@ function run (args) {
 
   const content = fs.readFileSync(filePath, { encoding: 'utf-8' })
   postcss([ColorVarPlugin({
-    searchFrom: process.cwd(),
+    searchFrom: filePath,
     syntax: 'less'
   })]).process(content, {
     from: undefined,
     syntax: lessSyntax
   })
     .then((result) => {
-      console.log(result.content)
       fs.writeFileSync(filePath, result.content, { encoding: 'utf-8' })
     })
 
