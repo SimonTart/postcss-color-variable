@@ -76,6 +76,8 @@ a {
   color: red;
   background: @short-hex;
 }
-    `)
+    `, {
+        searchFrom: __dirname
+      })
   })
 })
