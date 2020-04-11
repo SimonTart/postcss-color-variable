@@ -28,7 +28,8 @@
 项目中创建.colorvarrc.json
 ```json
 {
-  "variableFiles": ["./src/color.less"] // 定义变量的文件
+  "variableFiles": ["./src/color.less"], // 定义变量的文件
+  "syntax": "less" // 语法 less 目前只支持les
 }
 ```
 
