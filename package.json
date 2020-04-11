@@ -47,5 +47,6 @@
   },
   "jest": {
     "testEnvironment": "node"
-  }
+  },
+  "bin": "./bin/colorvar.js"
 }
