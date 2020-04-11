@@ -1,6 +1,6 @@
 {
   "name": "postcss-color-variable",
-  "version": "0.0.13",
+  "version": "0.0.15",
   "description": "PostCSS plugin color variable",
   "keywords": [
     "postcss",
@@ -19,6 +19,7 @@
   "repository": "111/postcss-color-variable",
   "dependencies": {
     "cosmiconfig": "^6.0.0",
+    "optionator": "^0.9.1",
     "postcss": "^7.0.18",
     "postcss-less": "^3.1.4"
   },
