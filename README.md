@@ -1,6 +1,6 @@
 # PostCSS Color Variable
 
-[PostCSS] plugin color variable. 替换less当中的颜色值为预定义的变量
+[PostCSS] plugin color variable. 替换颜色值为预定义的变量。目前只支持Less
 
 [PostCSS]: https://github.com/postcss/postcss
 定义颜色文件
@@ -12,6 +12,8 @@
 ```less
 .foo {
     color: #0a1;
+    background: rgb(170, 170, 170);
+    border: 1px solid rgba(170, 170, 170, 0.1);
 }
 ```
 
@@ -19,6 +21,8 @@
 ```less
 .foo {
   color: @link-color;
+  background: @link-color;
+  border: 1px solid fade(@link-color, 10%);
 }
 ```
 
