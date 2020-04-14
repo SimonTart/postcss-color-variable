@@ -13,7 +13,7 @@ async function run (input, output, opts) {
   expect(result.warnings()).toHaveLength(0)
 }
 
-describe('test postcss plugin', () => {
+describe('test postcss replace plugin', () => {
   it('should replace right', async () => {
     await run(`
 a {
@@ -40,7 +40,30 @@ a {
 }
     `, { variableFiles: [path.resolve(__dirname, './less/color-var.less')] })
   })
+})
 
+describe('test postcss using config function', () => {
+  it('should replace right when using rc config', async () => {
+    await run(
+      `
+a {
+  color: red;
+  background: #0a1;
+}
+    `,
+
+      `
+a {
+  color: red;
+  background: @short-hex;
+}
+    `, {
+        searchFrom: __dirname
+      })
+  })
+})
+
+describe('test postcss warning function', () => {
   it('should have warning', async () => {
     let result = await postcss(
       [
@@ -60,25 +83,6 @@ a {
         syntax: lessSyntax
       })
     expect(result.warnings()[0].text).toBe('#aaa,#bbb 找不到对应颜色变量')
-  })
-
-  it('should replace right when using rc config', async () => {
-    await run(
-      `
-a {
-  color: red;
-  background: #0a1;
-}
-    `,
-
-      `
-a {
-  color: red;
-  background: @short-hex;
-}
-    `, {
-        searchFrom: __dirname
-      })
   })
 })
 
