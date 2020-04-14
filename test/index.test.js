@@ -81,3 +81,100 @@ a {
       })
   })
 })
+
+describe('test plugin auth import file function', () => {
+  it('auto import need file after imported file', async () => {
+    const input = `
+@import "./utils.less";
+a {
+  color: red;
+  background: #0a1;
+}
+    `
+    const output = `
+@import "./utils.less";
+@import "../less/color-var.less";
+a {
+  color: red;
+  background: @short-hex;
+}
+    `
+    await run(input, output, {
+      autoImport: true,
+      variableFiles: [path.resolve(__dirname, './less/color-var.less')],
+      sourcePath: path.resolve(__dirname, './src/index.less')
+    })
+  })
+
+  it('auto import need file success on file first line', async () => {
+    const input = `
+a {
+  color: red;
+  background: #0a1;
+}
+    `
+    const output = `
+@import "../less/color-var.less";
+a {
+  color: red;
+  background: @short-hex;
+}
+    `
+    await run(input, output, {
+      autoImport: true,
+      variableFiles: [path.resolve(__dirname, './less/color-var.less')],
+      sourcePath: path.resolve(__dirname, './src/index.less')
+    })
+  })
+
+  it('auto import one file when already import one need file', async () => {
+    const input = `
+@import "../less/color-var.less";
+a {
+  color: #ff0000;
+  background: #0a1;
+}
+    `
+    const output = `
+@import "../less/color-var.less";
+@import "../less/color-var2.less";
+a {
+  color: @red-color;
+  background: @short-hex;
+}
+    `
+    await run(input, output, {
+      autoImport: true,
+      variableFiles: [
+        path.resolve(__dirname, './less/color-var.less'),
+        path.resolve(__dirname, './less/color-var2.less')
+      ],
+      sourcePath: path.resolve(__dirname, './src/index.less')
+    })
+  })
+
+  it('auto import multiple file', async () => {
+    const input = `
+a {
+  color: #ff0000;
+  background: #0a1;
+}
+    `
+    const output = `
+@import "../less/color-var.less";
+@import "../less/color-var2.less";
+a {
+  color: @red-color;
+  background: @short-hex;
+}
+    `
+    await run(input, output, {
+      autoImport: true,
+      variableFiles: [
+        path.resolve(__dirname, './less/color-var.less'),
+        path.resolve(__dirname, './less/color-var2.less')
+      ],
+      sourcePath: path.resolve(__dirname, './src/index.less')
+    })
+  })
+})

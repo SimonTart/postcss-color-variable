@@ -28,7 +28,7 @@ function resolveFileConfig (searchFrom) {
         }
 
         if (result.filepath) {
-          const fileFolder = path.dirname(result.filepath);
+          const fileFolder = path.dirname(result.filepath)
           return path.resolve(fileFolder, filePath)
         }
 
@@ -52,6 +52,7 @@ module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
   const colorToVar = utils.getColorMapFromFiles(config.variableFiles)
 
   return (root, result) => {
+    const needFileMap = {}
     root.walkDecls(decl => {
       const replaceResult = utils.replaceColor(decl.value, colorToVar, syntax)
 
@@ -64,9 +65,58 @@ module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
         newDecl.value = replaceResult.value
         decl.replaceWith(newDecl)
       }
+
       if (replaceResult.isMatchColor && replaceResult.notFoundColors.length > 0) {
         decl.warn(result, `${ replaceResult.notFoundColors.join(',') } 找不到对应颜色变量`)
       }
+
+      Object.assign(needFileMap, replaceResult.needFileMap)
+    })
+
+    if (!config.autoImport) {
+      return
+    }
+
+    if (Object.values(needFileMap).length === 0 || !config.sourcePath) {
+      return
+    }
+
+    const importedFilePath = {}
+    const sourceDir = path.dirname(config.sourcePath)
+    let lastImportRule
+    root.walkAtRules('import', rule => {
+      const filePath = path.resolve(sourceDir, rule.params.replace(/"/g, ''))
+      importedFilePath[filePath] = true
+      lastImportRule = rule
+    })
+
+    const needImportedFilePaths = Object.keys(needFileMap).filter(filePath => !importedFilePath[filePath])
+    if (needImportedFilePaths.length === 0) {
+      return
+    }
+
+    for (const filePath of needImportedFilePaths) {
+      const importRule = postcss.atRule({
+        name: 'import',
+        params: `"${ path.relative(sourceDir, filePath) }"`,
+        raws: {
+          before: '\n',
+          between: '',
+          afterName: ' '
+        }
+      })
+
+      if (lastImportRule) {
+        root.insertAfter(lastImportRule, importRule)
+      } else {
+        root.prepend(importRule)
+      }
+    }
+
+    root.walkAtRules('import', rule => {
+      const filePath = path.resolve(sourceDir, rule.params.replace(/"/g, ''))
+      importedFilePath[filePath] = true
+      lastImportRule = rule
     })
   }
 })

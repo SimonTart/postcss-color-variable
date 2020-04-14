@@ -137,13 +137,14 @@ function getColorMapFromFiles (files) {
 
     const css = fs.readFileSync(file, { encoding: 'utf-8' })
     const root = lessParser.parse(css)
-    root.walkAtRules((node) => {
+    root.walkAtRules(node => {
       const color = parseColor(node.params)
       if (color.type === constant.COLOR_TYPE.NOT_COLOR) {
         return
       }
       color.param = node.params
       color.name = node.name
+      color.filePath = file
       colorToVariable[color.id] = color
     })
   }
@@ -167,14 +168,25 @@ function dealFade (p1, p2, p3, color, colorToVar, syntax) {
     case constant.Syntax.CSS:
       return
     case constant.Syntax.LESS:
-      return p1 + `fade(@${ notAlphaColorVar.name }, ${ color.a * 100 }%)` + p3
+      return {
+        fadeValue: p1 + `fade(@${ notAlphaColorVar.name }, ${ color.a * 100 }%)` + p3,
+        notAlphaColorVar
+      }
   }
 }
 
 function replaceColor (value, colorToVar, syntax) {
   let notFoundColors = []
   let isMatchColor = false
-  for (const replaceRegExp of [ColorRegExp.ShortcutHexReplace, ColorRegExp.HexReplace, ColorRegExp.RGBReplace, ColorRegExp.RGBAReplace]) {
+  let needFileMap = {}
+  const regexps = [
+    ColorRegExp.ShortcutHexReplace,
+    ColorRegExp.HexReplace,
+    ColorRegExp.RGBReplace,
+    ColorRegExp.RGBAReplace
+  ]
+
+  for (const replaceRegExp of regexps) {
     value = value.replace(replaceRegExp, (match, p1, p2, p3) => {
       const color = parseColor(p2)
       if (color.type === constant.COLOR_TYPE.NOT_COLOR) {
@@ -184,11 +196,13 @@ function replaceColor (value, colorToVar, syntax) {
       isMatchColor = true
       const colorVar = colorToVar[color.id]
       if (colorVar && colorVar.name) {
+        needFileMap[colorVar.filePath] = true
         return p1 + `@${ colorVar.name }` + p3
       }
-      const fadeValue = dealFade(p1, p2, p3, color, colorToVar, syntax)
-      if (fadeValue) {
-        return fadeValue
+      const fadeResult = dealFade(p1, p2, p3, color, colorToVar, syntax)
+      if (fadeResult) {
+        needFileMap[fadeResult.notAlphaColorVar.filePath] = true
+        return fadeResult.fadeValue
       }
 
       notFoundColors.push(p2)
@@ -199,7 +213,8 @@ function replaceColor (value, colorToVar, syntax) {
   return {
     value,
     notFoundColors,
-    isMatchColor
+    isMatchColor,
+    needFileMap
   }
 }
 
