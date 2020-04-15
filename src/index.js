@@ -93,7 +93,7 @@ function resolveOpts (opts) {
 }
 
 function getConfig (opts) {
-  return Object.assign({}, DefaultConfig, resolveFileConfig(opts.searchFrom), resolveOpts(opts, opts.configPath))
+  return Object.assign({}, DefaultConfig, resolveFileConfig(opts.searchFrom), resolveOpts(opts))
 }
 
 module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
