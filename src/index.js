@@ -43,8 +43,6 @@ function resolveConfigFilesPath (filePaths, configPath) {
 
     const folder = getPathFolder(configPath)
     return path.resolve(folder, filePath)
-
-    return filePath
   })
 }
 
@@ -61,7 +59,7 @@ function resolveConfig (config, configPath) {
       const aliasPath = alias[key]
       const absolutePath = resolveConfigFilePath(aliasPath, configPath)
 
-      if (path.isAbsolute((absolutePath))) {
+      if (path.isAbsolute(absolutePath)) {
         result[key] = absolutePath
         return result
       }
@@ -95,7 +93,7 @@ function resolveOpts (opts) {
 }
 
 function getConfig (opts) {
-  return Object.assign({}, DefaultConfig, resolveFileConfig(opts.searchFrom), resolveOpts(opts))
+  return Object.assign({}, DefaultConfig, resolveFileConfig(opts.searchFrom), resolveOpts(opts, opts.configPath))
 }
 
 module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
