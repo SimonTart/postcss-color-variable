@@ -1,11 +1,11 @@
-let postcss = require('postcss')
-let path = require('path')
+const postcss = require('postcss')
+const path = require('path')
 const lessSyntax = require('postcss-less')
 
-let plugin = require('../src/index')
+const plugin = require('../src/index')
 
 async function run (input, output, opts) {
-  let result = await postcss([plugin(opts)]).process(input, {
+  const result = await postcss([plugin(opts)]).process(input, {
     from: undefined,
     syntax: lessSyntax
   })
@@ -87,6 +87,30 @@ describe('test postcss warning function', () => {
 })
 
 describe('test plugin auth import file function', () => {
+  it('not import file when file already imported', async () => {
+    const input = `
+@import "./utils.less";
+@import "../less/color-var.less";
+a {
+  color: red;
+  background: #0a1;
+}
+    `
+    const output = `
+@import "./utils.less";
+@import "../less/color-var.less";
+a {
+  color: red;
+  background: @short-hex;
+}
+    `
+    await run(input, output, {
+      autoImport: true,
+      variableFiles: [path.resolve(__dirname, './less/color-var.less')],
+      sourcePath: path.resolve(__dirname, './src/index.less')
+    })
+  })
+
   it('auto import need file after imported file', async () => {
     const input = `
 @import "./utils.less";
@@ -178,6 +202,95 @@ a {
         path.resolve(__dirname, './less/color-var.less'),
         path.resolve(__dirname, './less/color-var2.less')
       ],
+      sourcePath: path.resolve(__dirname, './src/index.less')
+    })
+  })
+
+  it('not import file when file already imported by alias', async () => {
+    const input = `
+@import "~@/less/color-var.less";
+@import "~@/less/color-var2.less";
+a {
+  color: #ff0000;
+  background: #0a1;
+}
+    `
+    const output = `
+@import "~@/less/color-var.less";
+@import "~@/less/color-var2.less";
+a {
+  color: @red-color;
+  background: @short-hex;
+}
+    `
+    await run(input, output, {
+      autoImport: true,
+      variableFiles: [
+        path.resolve(__dirname, './less/color-var.less'),
+        path.resolve(__dirname, './less/color-var2.less')
+      ],
+      alias: {
+        '@': path.resolve(__dirname),
+      },
+      sourcePath: path.resolve(__dirname, './src/index.less')
+    })
+  })
+
+  it('auto import file using relative path', async () => {
+    const input = `
+@import "~@/less/color-var.less";
+a {
+  color: #ff0000;
+  background: #0a1;
+}
+    `
+    const output = `
+@import "~@/less/color-var.less";
+@import "../less/color-var2.less";
+a {
+  color: @red-color;
+  background: @short-hex;
+}
+    `
+    await run(input, output, {
+      autoImport: true,
+      variableFiles: [
+        path.resolve(__dirname, './less/color-var.less'),
+        path.resolve(__dirname, './less/color-var2.less')
+      ],
+      alias: {
+        '@': path.resolve(__dirname),
+      },
+      sourcePath: path.resolve(__dirname, './src/index.less')
+    })
+  })
+
+  it('auto import file using absolute path', async () => {
+    const input = `
+@import "~@/less/color-var.less";
+a {
+  color: #ff0000;
+  background: #0a1;
+}
+    `
+    const output = `
+@import "~@/less/color-var.less";
+@import "~@/less/color-var2.less";
+a {
+  color: @red-color;
+  background: @short-hex;
+}
+    `
+    await run(input, output, {
+      autoImport: true,
+      variableFiles: [
+        path.resolve(__dirname, './less/color-var.less'),
+        path.resolve(__dirname, './less/color-var2.less')
+      ],
+      alias: {
+        '@': path.resolve(__dirname),
+      },
+      usingAlias: '@',
       sourcePath: path.resolve(__dirname, './src/index.less')
     })
   })

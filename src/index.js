@@ -9,6 +9,7 @@ const constant = require('./constant')
 const ConfigFileName = 'colorvar'
 const DefaultConfig = {
   variableFiles: [],
+  alias: {},
   syntax: 'css'
 }
 
@@ -19,10 +20,11 @@ function resolveFileConfig (searchFrom) {
   if (!result) {
     return {}
   }
-
-  if (result.config && result.config.variableFiles) {
+  const variableFiles = (result.config && result.config.variableFiles) || []
+  const alias = (result.config && result.config.alias) || {}
+  if (result.config) {
     return Object.assign({}, result.config, {
-      variableFiles: result.config.variableFiles.map(filePath => {
+      variableFiles: variableFiles.map(filePath => {
         if (path.isAbsolute(filePath)) {
           return filePath
         }
@@ -33,7 +35,25 @@ function resolveFileConfig (searchFrom) {
         }
 
         return filePath
-      })
+      }),
+      alias: Object.keys(alias).reduce((result, key) => {
+        const aliasPath = alias[key]
+        if (path.isAbsolute(aliasPath)) {
+          result[key] = aliasPath
+          return result
+        }
+
+        if (result.filepath) {
+          const fileFolder = path.dirname(result.filepath)
+          const absolutePath = path.isAbsolute(aliasPath) ? aliasPath : path.relative(fileFolder, aliasPath)
+          if (path.isAbsolute((absolutePath))) {
+            result[key] = absolutePath
+            return result
+          }
+        }
+
+        return result
+      }, [])
     })
   }
 
@@ -85,7 +105,11 @@ module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
     const sourceDir = path.dirname(config.sourcePath)
     let lastImportRule
     root.walkAtRules('import', rule => {
-      const filePath = path.resolve(sourceDir, rule.params.replace(/"/g, ''))
+      let filePath = rule.params.replace(/"/g, '')
+      filePath = utils.resolvePathWithAlias(filePath, config.alias)
+      if (!path.isAbsolute(filePath)) {
+        filePath = path.resolve(sourceDir, filePath)
+      }
       importedFilePath[filePath] = true
       lastImportRule = rule
     })
@@ -95,10 +119,12 @@ module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
       return
     }
 
+    const aliasName = config.usingAlias && config.alias && config.alias[config.usingAlias] ? config.usingAlias : undefined
+    const importFrom = aliasName ? config.alias[aliasName] : sourceDir
     for (const filePath of needImportedFilePaths) {
       const importRule = postcss.atRule({
         name: 'import',
-        params: `"${ path.relative(sourceDir, filePath) }"`,
+        params: `"${ aliasName ? '~' + aliasName + '/' : '' }${ path.relative(importFrom, filePath) }"`,
         raws: {
           before: '\n',
           between: '',

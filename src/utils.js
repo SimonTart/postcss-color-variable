@@ -1,5 +1,6 @@
 /* eslint-disable prefer-let/prefer-let, consistent-return */
 const fs = require('fs')
+const path = require('path')
 const lessParser = require('postcss-less')
 
 const constant = require('./constant')
@@ -218,11 +219,38 @@ function replaceColor (value, colorToVar, syntax) {
   }
 }
 
+
+function resolvePathWithAlias(filePath, alias) {
+  if (!alias) {
+    return filePath;
+  }
+
+  if (Object.keys(alias).length === 0) {
+    return filePath;
+  }
+
+  if (!filePath.startsWith('~')) {
+    return filePath;
+  }
+
+  const realFilePath = filePath.slice(1);
+  const filePathAlias = realFilePath.split('/')[0];
+  const fileRemainPath = realFilePath.split('/').slice(1).join('/');
+  const aliasPath = alias[filePathAlias];
+  if (!aliasPath) {
+    return filePath;
+  }
+
+  return path.resolve(aliasPath, fileRemainPath)
+}
+
+
 module.exports = {
   getColorMapFromFiles,
   parseColor,
   getColorId,
   appendId,
   replaceColor,
-  dealFade
+  dealFade,
+  resolvePathWithAlias
 }

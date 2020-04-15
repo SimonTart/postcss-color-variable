@@ -305,3 +305,22 @@ describe('test replaceColor', () => {
       })
   })
 })
+
+
+describe('test resolvePathWithAlias', () => {
+  const alias = {
+    '@': '/src'
+  }
+
+  it('should return original filePath when filePath without alias', function () {
+    expect(utils.resolvePathWithAlias('./test/color.less', alias)).toBe('./test/color.less')
+  })
+
+  it('should return original filePath when filePath alias notfound in alias', function () {
+    expect(utils.resolvePathWithAlias('~$/test/color.less', alias)).toBe('~$/test/color.less')
+  })
+
+  it('should return replaced alias filePath', function () {
+    expect(utils.resolvePathWithAlias('~@/test/color.less', alias)).toBe('/src/test/color.less')
+  })
+})
