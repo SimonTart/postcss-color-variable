@@ -1,5 +1,6 @@
 /* eslint-disable prefer-let/prefer-let */
 const postcss = require('postcss')
+const fs = require('fs')
 const { cosmiconfigSync } = require('cosmiconfig')
 const path = require('path')
 
@@ -15,54 +16,86 @@ const DefaultConfig = {
 
 const explorerSync = cosmiconfigSync(ConfigFileName)
 
+function getPathFolder (filePath) {
+  return fs.lstatSync(filePath).isFile() ? path.dirname(filePath) : filePath
+}
+
+function resolveConfigFilePath (filePath, configPath) {
+  if (!filePath || !configPath) {
+    return filePath
+  }
+  if (path.isAbsolute(filePath)) {
+    return filePath
+  }
+
+  const folder = getPathFolder(configPath)
+  return path.resolve(folder, filePath)
+}
+
+function resolveConfigFilesPath (filePaths, configPath) {
+  if (!filePaths || !configPath) {
+    return filePaths
+  }
+  return filePaths.map(filePath => {
+    if (path.isAbsolute(filePath)) {
+      return filePath
+    }
+
+    const folder = getPathFolder(configPath)
+    return path.resolve(folder, filePath)
+
+    return filePath
+  })
+}
+
+function resolveConfig (config, configPath) {
+  if (!config) {
+    return
+  }
+
+  const { alias, variableFiles } = config
+  config = {
+    ...config,
+    variableFiles: resolveConfigFilesPath(variableFiles, configPath),
+    alias: alias ? Object.keys(config.alias).reduce((result, key) => {
+      const aliasPath = alias[key]
+      const absolutePath = resolveConfigFilePath(aliasPath, configPath)
+
+      if (path.isAbsolute((absolutePath))) {
+        result[key] = absolutePath
+        return result
+      }
+
+      return result
+    }, []) : undefined
+  }
+
+  const parsedConfig = {}
+  for (const key in config) {
+    if (typeof config[key] !== 'undefined') {
+      parsedConfig[key] = config[key]
+    }
+  }
+
+  return parsedConfig
+}
+
 function resolveFileConfig (searchFrom) {
   const result = explorerSync.search(searchFrom)
   if (!result) {
     return {}
   }
-  const variableFiles = (result.config && result.config.variableFiles) || []
-  const alias = (result.config && result.config.alias) || {}
-  if (result.config) {
-    return Object.assign({}, result.config, {
-      variableFiles: variableFiles.map(filePath => {
-        if (path.isAbsolute(filePath)) {
-          return filePath
-        }
 
-        if (result.filepath) {
-          const fileFolder = path.dirname(result.filepath)
-          return path.resolve(fileFolder, filePath)
-        }
+  return resolveConfig(result.config, result.filepath)
 
-        return filePath
-      }),
-      alias: Object.keys(alias).reduce((result, key) => {
-        const aliasPath = alias[key]
-        if (path.isAbsolute(aliasPath)) {
-          result[key] = aliasPath
-          return result
-        }
+}
 
-        if (result.filepath) {
-          const fileFolder = path.dirname(result.filepath)
-          const absolutePath = path.isAbsolute(aliasPath) ? aliasPath : path.relative(fileFolder, aliasPath)
-          if (path.isAbsolute((absolutePath))) {
-            result[key] = absolutePath
-            return result
-          }
-        }
-
-        return result
-      }, [])
-    })
-  }
-
-  return result.config || {}
+function resolveOpts (opts) {
+  return resolveConfig(opts, opts.configPath)
 }
 
 function getConfig (opts) {
-  const fileConfig = resolveFileConfig(opts.searchFrom)
-  return Object.assign({}, DefaultConfig, fileConfig, opts)
+  return Object.assign({}, DefaultConfig, resolveFileConfig(opts.searchFrom), resolveOpts(opts))
 }
 
 module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {

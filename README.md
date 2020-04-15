@@ -34,10 +34,11 @@
 {
   "variableFiles": ["./src/color.less"], // 定义变量的文件
   "syntax": "less", // 语法 less 目前只支持les
+  "autoImport": "true", // 是否自动导入依赖的variableFile
   "alias": {
-    "@": "./src" // webpack 中的alias
+    "@": "./src" // 等同于webpack 中的alias
   },
-  "usingAlias": "@" // 自动导入时，使用alias
+  "usingAlias": "@" // 自动导入variableFile时，使用alias，例如 @import '~@/src/color.less'
 }
 ```
 
