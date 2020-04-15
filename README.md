@@ -33,7 +33,11 @@
 ```json
 {
   "variableFiles": ["./src/color.less"], // 定义变量的文件
-  "syntax": "less" // 语法 less 目前只支持les
+  "syntax": "less", // 语法 less 目前只支持les
+  "alias": {
+    "@": "./src" // webpack 中的alias
+  },
+  "usingAlias": "@" // 自动导入时，使用alias
 }
 ```
 
