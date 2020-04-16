@@ -3,7 +3,8 @@
 [PostCSS] plugin color variable. 替换颜色值为预定义的变量。目前只支持Less
 
 [PostCSS]: https://github.com/postcss/postcss
-定义颜色文件
+
+定义颜色变量名的文件
 ```less
 @link-color: #0a1;
 ```
@@ -26,9 +27,8 @@
 }
 ```
 
-## 用法
+## 配置
 
-### 创建配置文件
 项目中创建.colorvarrc.json
 ```json
 {
@@ -43,7 +43,8 @@
 }
 ```
 
-### 通过命令替换指定文件
+## 使用
+### 命令行
 ```bash
 # 安装插件
 npm install postcss-color-variable --save-dev
@@ -51,11 +52,11 @@ npm install postcss-color-variable --save-dev
 ./node_modules/.bin/postcss-color-variable src/index.less
 ```
 
-### 在VSCode中通过插件替换
+### VSCode插件
 https://marketplace.visualstudio.com/items?itemName=zengxb94.color-variable&ssr=false#overview
 
-### 在WebStrom中使用
-1. 安装插件
+### WebStorm中使用
+1. 安装依赖
 ```bash
 npm install postcss-color-variable --save-dev
 ```
