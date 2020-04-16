@@ -38,7 +38,8 @@
   "alias": {
     "@": "./src" // 等同于 webpack 中的alias
   },
-  "usingAlias": "@" // 自动导入 variableFile 时，使用 alias ，例如 @import '~@/src/color.less'
+  "usingAlias": "@", // 自动导入 variableFile 时，使用 alias ，例如 @import '~@/src/color.less'
+  "singleQuote": false, // 自动导入时是否使用单引号， 默认 false
 }
 ```
 
