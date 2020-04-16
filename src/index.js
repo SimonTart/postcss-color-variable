@@ -152,10 +152,11 @@ module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
 
     const aliasName = config.usingAlias && config.alias && config.alias[config.usingAlias] ? config.usingAlias : undefined
     const importFrom = aliasName ? config.alias[aliasName] : sourceDir
+    const quote = config.singleQuote ? '\'' : '"'
     for (const filePath of needImportedFilePaths) {
       const importRule = postcss.atRule({
         name: 'import',
-        params: `"${ aliasName ? '~' + aliasName + '/' : '' }${ path.relative(importFrom, filePath) }"`,
+        params: `${ quote }${ aliasName ? '~' + aliasName + '/' : '' }${ path.relative(importFrom, filePath) }${ quote }`,
         raws: {
           before: '\n',
           between: '',
@@ -171,7 +172,7 @@ module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
     }
 
     root.walkAtRules('import', rule => {
-      const filePath = path.resolve(sourceDir, rule.params.replace(/"/g, ''))
+      const filePath = path.resolve(sourceDir, rule.params.replace(/"|'/g, ''))
       importedFilePath[filePath] = true
       lastImportRule = rule
     })
