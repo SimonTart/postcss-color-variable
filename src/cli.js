@@ -35,6 +35,7 @@ function run (args) {
   const content = fs.readFileSync(filePath, { encoding: 'utf-8' })
   postcss([ColorVarPlugin({
     searchFrom: filePath,
+    sourcePath: filePath,
     syntax: 'less'
   })]).process(content, {
     from: undefined,
