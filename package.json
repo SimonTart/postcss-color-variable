@@ -1,6 +1,6 @@
 {
   "name": "postcss-color-variable",
-  "version": "0.3.2",
+  "version": "0.3.4",
   "description": "PostCSS plugin color variable",
   "keywords": [
     "postcss",
@@ -16,7 +16,7 @@
   "main": "./src/index.js",
   "author": "zengxb94@foxmail.com",
   "license": "MIT",
-  "repository": "111/postcss-color-variable",
+  "repository": "SimonTart/postcss-color-variable",
   "dependencies": {
     "cosmiconfig": "^6.0.0",
     "optionator": "^0.9.1",

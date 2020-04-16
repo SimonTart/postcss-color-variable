@@ -56,13 +56,14 @@ npm install postcss-color-variable --save-dev
 https://marketplace.visualstudio.com/items?itemName=zengxb94.color-variable&ssr=false#overview
 
 ### WebStorm中使用
-1. 安装依赖
-```bash
-npm install postcss-color-variable --save-dev
-```
-2. Preferences -> File Watchers -> Add Custom
-3. 配置参数：
-  - File Type: Less Style Sheet
-  - Program: $ProjectFileDir$/node_modules/.bin/postcss-color-variable
-  - Arguments: $FilePathRelativeToProjectRoot$
-  - Working Directory: $ProjectFileDir$
+1. 安装依赖 npm install postcss-color-variable --save-dev
+2. Preferences -> File Watchers -> Add
+3. 设置参数
+  - Name: `Color Variable Less`
+  - File type: `Less Style Sheet`
+  - Program: `$ProjectFileDir$/node_modules/.bin/postcss-color-variable`
+  - Arguments: `$FilePathRelativeToProjectRoot$`
+  - Output paths to refresh: `$FilePathRelativeToProjectRoot$`
+  - Working Directory: `$ProjectFileDir$`
+  - Auto-save edited files to trogger watcher  设置为不勾选
+  - Trigger The watcher on external changes 设置为不勾选
