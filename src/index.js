@@ -136,7 +136,7 @@ module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
     const sourceDir = path.dirname(config.sourcePath)
     let lastImportRule
     root.walkAtRules('import', rule => {
-      let filePath = rule.params.replace(/"/g, '')
+      let filePath = rule.params.replace(/"|'/g, '')
       filePath = utils.resolvePathWithAlias(filePath, config.alias)
       if (!path.isAbsolute(filePath)) {
         filePath = path.resolve(sourceDir, filePath)

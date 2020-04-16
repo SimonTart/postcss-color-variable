@@ -32,13 +32,13 @@
 项目中创建.colorvarrc.json
 ```json
 {
-  "variableFiles": ["./src/color.less"], // 定义变量的文件
-  "syntax": "less", // 语法 less 目前只支持les
-  "autoImport": "true", // 是否自动导入依赖的variableFile
+  "variableFiles": ["./src/color.less"], // 定义颜色变量的文件
+  "syntax": "less", // 语法 less 目前只支持 less
+  "autoImport": "true", // 是否自动导入依赖的 variableFile
   "alias": {
-    "@": "./src" // 等同于webpack 中的alias
+    "@": "./src" // 等同于 webpack 中的alias
   },
-  "usingAlias": "@" // 自动导入variableFile时，使用alias，例如 @import '~@/src/color.less'
+  "usingAlias": "@" // 自动导入 variableFile 时，使用 alias ，例如 @import '~@/src/color.less'
 }
 ```
 
