@@ -1,0 +1,4 @@
+{
+  "variableFiles": ["./color-var.less"],
+  "syntax": "less"
+}
