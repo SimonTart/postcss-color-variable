@@ -55,15 +55,30 @@ npm install postcss-color-variable --save-dev
 ./node_modules/.bin/postcss-color-variable src/index.scss --syntax scss
 ```
 
-### VSCode插件
+### VSCode 插件
 https://marketplace.visualstudio.com/items?itemName=zengxb94.color-variable&ssr=false#overview
 
-### WebStorm中使用
+### WebStorm 中使用
+#### WebStorm 中替换 Less 的颜色值
 1. 安装依赖 npm install postcss-color-variable --save-dev
 2. Preferences -> File Watchers -> Add
 3. 设置参数
   - Name: `Color Variable Less`
   - File type: `Less Style Sheet`
+  - Program: `$ProjectFileDir$/node_modules/.bin/postcss-color-variable`
+  - Arguments: `$FilePathRelativeToProjectRoot$`
+  - Output paths to refresh: `$FilePathRelativeToProjectRoot$`
+  - Working Directory: `$ProjectFileDir$`
+  - Auto-save edited files to trogger watcher  设置为不勾选
+  - Trigger The watcher on external changes 设置为不勾选
+
+
+### WebStorm 中替换 Sass 的颜色值
+1. 安装依赖 npm install postcss-color-variable --save-dev
+2. Preferences -> File Watchers -> Add
+3. 设置参数
+  - Name: `Color Variable Sass`
+  - File type: `Sass Style Sheet`
   - Program: `$ProjectFileDir$/node_modules/.bin/postcss-color-variable`
   - Arguments: `$FilePathRelativeToProjectRoot$`
   - Output paths to refresh: `$FilePathRelativeToProjectRoot$`
