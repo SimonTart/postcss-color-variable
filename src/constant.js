@@ -1,4 +1,13 @@
-module.exports.COLOR_TYPE = {
+const lessParser = require('postcss-less')
+const sassParser = require('postcss-scss')
+
+const Syntax = {
+  css: 'css',
+  less: 'less',
+  scss: 'scss'
+}
+
+const COLOR_TYPE = {
   SHORTCUT_HEX: 'SHORTCUT_HEX',
   HEX: 'HEX',
   RGB: 'RGB',
@@ -6,7 +15,19 @@ module.exports.COLOR_TYPE = {
   NOT_COLOR: 'NOT_COLOR'
 }
 
-module.exports.Syntax = {
-  CSS: 'CSS',
-  LESS: 'LESS'
+const ParserMap = {
+  less: lessParser,
+  scss: sassParser
+}
+
+const VariablePrefix = {
+  less: '@',
+  scss: '$'
+}
+
+module.exports = {
+  Syntax,
+  ParserMap,
+  COLOR_TYPE,
+  VariablePrefix
 }

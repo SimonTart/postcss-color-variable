@@ -1,7 +1,7 @@
 /* eslint-disable prefer-let/prefer-let, consistent-return */
 const fs = require('fs')
 const path = require('path')
-const lessParser = require('postcss-less')
+const { cosmiconfigSync } = require('cosmiconfig')
 
 const constant = require('./constant')
 
@@ -51,7 +51,7 @@ function isValidAlpha (v) {
   return v >= 0 && v <= 1
 }
 
-function parseColor (value) {
+function parseColor (value, syntax) {
   let color = {
     type: constant.COLOR_TYPE.NOT_COLOR
   }
@@ -129,25 +129,47 @@ function appendId (color) {
   return color
 }
 
-function getColorMapFromFiles (files) {
+function getColorMapFromFiles (files, syntax = 'less') {
+
   const colorToVariable = {}
   for (const file of files) {
     if (!fs.existsSync(file)) {
       continue
     }
 
-    const css = fs.readFileSync(file, { encoding: 'utf-8' })
-    const root = lessParser.parse(css)
-    root.walkAtRules(node => {
-      const color = parseColor(node.params)
-      if (color.type === constant.COLOR_TYPE.NOT_COLOR) {
-        return
-      }
-      color.param = node.params
-      color.name = node.name
-      color.filePath = file
-      colorToVariable[color.id] = color
-    })
+    const content = fs.readFileSync(file, { encoding: 'utf-8' })
+    const parser = constant.ParserMap[syntax]
+    const root = parser.parse(content)
+
+    if (syntax === constant.Syntax.less) {
+      root.walkAtRules(node => {
+        const color = parseColor(node.params)
+        if (color.type === constant.COLOR_TYPE.NOT_COLOR) {
+          return
+        }
+        color.param = node.params
+        color.name = node.name
+        color.filePath = file
+        colorToVariable[color.id] = color
+      })
+    }
+
+    if (syntax === constant.Syntax.scss) {
+      root.walkDecls(node => {
+        if (!node.prop || !node.prop.startsWith('$')) {
+          return
+        }
+        const color = parseColor(node.value)
+        if (color.type === constant.COLOR_TYPE.NOT_COLOR) {
+          return
+        }
+        color.param = node.value
+        color.name = node.prop.slice(1)
+        color.filePath = file
+        colorToVariable[color.id] = color
+      })
+    }
+
   }
 
   return colorToVariable
@@ -166,11 +188,16 @@ function dealFade (p1, p2, p3, color, colorToVar, syntax) {
   }
 
   switch (syntax) {
-    case constant.Syntax.CSS:
+    case constant.Syntax.css:
       return
-    case constant.Syntax.LESS:
+    case constant.Syntax.less:
       return {
-        fadeValue: p1 + `fade(@${ notAlphaColorVar.name }, ${ color.a * 100 }%)` + p3,
+        fadeValue: p1 + `fade(${ constant.VariablePrefix[syntax] }${ notAlphaColorVar.name }, ${ color.a * 100 }%)` + p3,
+        notAlphaColorVar
+      }
+    case constant.Syntax.scss:
+      return {
+        fadeValue: p1 + `rgba(${ constant.VariablePrefix[syntax] }${ notAlphaColorVar.name }, ${ color.a })` + p3,
         notAlphaColorVar
       }
   }
@@ -195,10 +222,11 @@ function replaceColor (value, colorToVar, syntax) {
       }
 
       isMatchColor = true
+
       const colorVar = colorToVar[color.id]
       if (colorVar && colorVar.name) {
         needFileMap[colorVar.filePath] = true
-        return p1 + `@${ colorVar.name }` + p3
+        return p1 + `${ constant.VariablePrefix[syntax] }${ colorVar.name }` + p3
       }
       const fadeResult = dealFade(p1, p2, p3, color, colorToVar, syntax)
       if (fadeResult) {
@@ -219,31 +247,33 @@ function replaceColor (value, colorToVar, syntax) {
   }
 }
 
-
-function resolvePathWithAlias(filePath, alias) {
+function resolvePathWithAlias (filePath, alias) {
   if (!alias) {
-    return filePath;
+    return filePath
   }
 
   if (Object.keys(alias).length === 0) {
-    return filePath;
+    return filePath
   }
 
   if (!filePath.startsWith('~')) {
-    return filePath;
+    return filePath
   }
 
-  const realFilePath = filePath.slice(1);
-  const filePathAlias = realFilePath.split('/')[0];
-  const fileRemainPath = realFilePath.split('/').slice(1).join('/');
-  const aliasPath = alias[filePathAlias];
+  const realFilePath = filePath.slice(1)
+  const filePathAlias = realFilePath.split('/')[0]
+  const fileRemainPath = realFilePath.split('/').slice(1).join('/')
+  const aliasPath = alias[filePathAlias]
   if (!aliasPath) {
-    return filePath;
+    return filePath
   }
 
   return path.resolve(aliasPath, fileRemainPath)
 }
 
+
+const ConfigFileName = 'colorvar'
+const explorerSync = cosmiconfigSync(ConfigFileName)
 
 module.exports = {
   getColorMapFromFiles,
@@ -252,5 +282,6 @@ module.exports = {
   appendId,
   replaceColor,
   dealFade,
-  resolvePathWithAlias
+  resolvePathWithAlias,
+  explorerSync
 }

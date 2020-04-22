@@ -104,7 +104,7 @@ describe('test appendId', () => {
 })
 
 describe('test getColorMapFromFiles', () => {
-  it('should return right map', async () => {
+  it('should return right map when parse less', async () => {
     const colorToVar = utils.getColorMapFromFiles([path.resolve(__dirname, './less/color-var.less')])
     const colorFilePath = path.resolve(__dirname, './less/color-var.less')
     const rightColors = [
@@ -139,13 +139,44 @@ describe('test getColorMapFromFiles', () => {
     const colorToVar = utils.getColorMapFromFiles([path.resolve(__dirname, './less/empty.less')])
     expect(colorToVar).toEqual({})
   })
+
+  it('should return right map when parse sass', async () => {
+    const colorToVar = utils.getColorMapFromFiles([path.resolve(__dirname, './sass/color-var.scss')], 'scss')
+    const colorFilePath = path.resolve(__dirname, './sass/color-var.scss')
+    const rightColors = [
+      {
+        type: constant.COLOR_TYPE.SHORTCUT_HEX,
+        r: 0,
+        g: 170,
+        b: 17,
+        a: 1,
+        name: 'short-hex',
+        param: '#0a1',
+        filePath: colorFilePath
+      }, {
+        type: constant.COLOR_TYPE.RGBA,
+        r: 66,
+        g: 139,
+        b: 202,
+        a: 0.1,
+        name: 'link-color',
+        param: 'rgba(66, 139, 202, 0.1)',
+        filePath: colorFilePath
+      }]
+    const result = rightColors.reduce((map, color) => {
+      const c = utils.appendId(color)
+      map[c.id] = c
+      return map
+    }, {})
+    expect(colorToVar).toEqual(result)
+  })
 })
 
 describe('test dealFade', () => {
   it('should return new value', () => {
     const colorToVar = utils.getColorMapFromFiles([path.resolve(__dirname, './less/color-var.less')])
     const color = utils.parseColor('rgba(0, 170, 17, 0.1)')
-    const fadeResult = utils.dealFade('solid 1px ', 'rgba(0, 170, 17, 0.1)', '', color, colorToVar, constant.Syntax.LESS)
+    const fadeResult = utils.dealFade('solid 1px ', 'rgba(0, 170, 17, 0.1)', '', color, colorToVar, constant.Syntax.less)
     expect(fadeResult.fadeValue).toBe('solid 1px fade(@short-hex, 10%)')
     expect(fadeResult.notAlphaColorVar.id).toBe('0-170-17-1')
 
@@ -154,8 +185,8 @@ describe('test dealFade', () => {
   it('should return undefined', () => {
     const colorToVar = utils.getColorMapFromFiles([path.resolve(__dirname, './less/color-var.less')])
     const color = utils.parseColor('#bbb')
-    expect(utils.dealFade('solid 1px ', '#bbb', '', color, colorToVar, constant.Syntax.LESS)).toBe(undefined)
-    expect(utils.dealFade('solid 1px ', 'rgba(0, 170, 17, 1)', '', color, colorToVar, constant.Syntax.LESS)).toBe(undefined)
+    expect(utils.dealFade('solid 1px ', '#bbb', '', color, colorToVar, constant.Syntax.less)).toBe(undefined)
+    expect(utils.dealFade('solid 1px ', 'rgba(0, 170, 17, 1)', '', color, colorToVar, constant.Syntax.less)).toBe(undefined)
   })
 })
 
@@ -208,7 +239,7 @@ describe('test replaceColor', () => {
   }, {})
 
   it('should replace success when one hex  color', () => {
-    expect(utils.replaceColor('solid 1px #0a1', colorToVar)).toEqual({
+    expect(utils.replaceColor('solid 1px #0a1', colorToVar, constant.Syntax.less)).toEqual({
       value: 'solid 1px @short-hex-color',
       notFoundColors: [],
       isMatchColor: true,
@@ -216,7 +247,7 @@ describe('test replaceColor', () => {
         [colorFilePath]: true
       }
     })
-    expect(utils.replaceColor('solid 1px #ffffff', colorToVar)).toEqual({
+    expect(utils.replaceColor('solid 1px #ffffff', colorToVar, constant.Syntax.less)).toEqual({
       value: 'solid 1px @white',
       notFoundColors: [],
       isMatchColor: true,
@@ -227,7 +258,7 @@ describe('test replaceColor', () => {
   })
 
   it('should replace success when one rgb,rgba  color', () => {
-    expect(utils.replaceColor('solid 1px rgba(66, 139, 202, 0.1)', colorToVar)).toEqual({
+    expect(utils.replaceColor('solid 1px rgba(66, 139, 202, 0.1)', colorToVar, constant.Syntax.less)).toEqual({
       value: 'solid 1px @rgba-color',
       notFoundColors: [],
       isMatchColor: true,
@@ -235,7 +266,7 @@ describe('test replaceColor', () => {
         [colorFilePath]: true
       }
     })
-    expect(utils.replaceColor('solid 1px rgb(66, 139, 202)', colorToVar)).toEqual({
+    expect(utils.replaceColor('solid 1px rgb(66, 139, 202)', colorToVar, constant.Syntax.less)).toEqual({
       value: 'solid 1px @rgb-color',
       notFoundColors: [],
       isMatchColor: true,
@@ -246,7 +277,7 @@ describe('test replaceColor', () => {
   })
 
   it('should replace success when one line has multiple  color', () => {
-    expect(utils.replaceColor('linear-gradient(#0a1 0%, #ffffff 100%)', colorToVar))
+    expect(utils.replaceColor('linear-gradient(#0a1 0%, #ffffff 100%)', colorToVar, constant.Syntax.less))
       .toEqual({
         value: 'linear-gradient(@short-hex-color 0%, @white 100%)',
         notFoundColors: [],
@@ -258,7 +289,7 @@ describe('test replaceColor', () => {
   })
 
   it('should return right notFoundColor', () => {
-    expect(utils.replaceColor('linear-gradient(#aaa 0%, #bbb 100%)', colorToVar))
+    expect(utils.replaceColor('linear-gradient(#aaa 0%, #bbb 100%)', colorToVar, constant.Syntax.less))
       .toEqual({
         value: 'linear-gradient(#aaa 0%, #bbb 100%)',
         notFoundColors: ['#aaa', '#bbb'],
@@ -266,7 +297,7 @@ describe('test replaceColor', () => {
         needFileMap: {}
       })
 
-    expect(utils.replaceColor('linear-gradient(#000 0%, #ffffff 100%)', colorToVar))
+    expect(utils.replaceColor('linear-gradient(#000 0%, #ffffff 100%)', colorToVar, constant.Syntax.less))
       .toEqual({
         value: 'linear-gradient(#000 0%, @white 100%)',
         notFoundColors: ['#000'],
@@ -276,7 +307,7 @@ describe('test replaceColor', () => {
         }
       })
 
-    expect(utils.replaceColor('solid 1px rgba(0,0,0,0.1)', colorToVar, constant.Syntax.LESS)).toEqual({
+    expect(utils.replaceColor('solid 1px rgba(0,0,0,0.1)', colorToVar, constant.Syntax.less)).toEqual({
       value: 'solid 1px rgba(0,0,0,0.1)',
       notFoundColors: ['rgba(0,0,0,0.1)'],
       isMatchColor: true,
@@ -285,8 +316,30 @@ describe('test replaceColor', () => {
   })
 
   it('should replace success when need fade color', () => {
-    expect(utils.replaceColor('solid 1px rgba(255,255,255,0.1)', colorToVar, constant.Syntax.LESS)).toEqual({
+    expect(utils.replaceColor('solid 1px rgba(255,255,255,0.1)', colorToVar, constant.Syntax.less)).toEqual({
       value: 'solid 1px fade(@white, 10%)',
+      notFoundColors: [],
+      isMatchColor: true,
+      needFileMap: {
+        [colorFilePath]: true
+      }
+    })
+  })
+
+  it('should replace success when need fade color in sass', () => {
+    expect(utils.replaceColor('solid 1px rgba(255,255,255,0.1)', colorToVar, constant.Syntax.scss)).toEqual({
+      value: 'solid 1px rgba($white, 0.1)',
+      notFoundColors: [],
+      isMatchColor: true,
+      needFileMap: {
+        [colorFilePath]: true
+      }
+    })
+  })
+
+  it('should replace success when need fade color when using sass', () => {
+    expect(utils.replaceColor('solid 1px rgba(255,255,255,0.1)', colorToVar, constant.Syntax.scss)).toEqual({
+      value: 'solid 1px rgba($white, 0.1)',
       notFoundColors: [],
       isMatchColor: true,
       needFileMap: {
@@ -305,7 +358,6 @@ describe('test replaceColor', () => {
       })
   })
 })
-
 
 describe('test resolvePathWithAlias', () => {
   const alias = {

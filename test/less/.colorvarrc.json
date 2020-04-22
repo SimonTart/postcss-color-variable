@@ -1,4 +1,4 @@
 {
-  "variableFiles": ["./test/less/color-var.less"],
+  "variableFiles": ["./color-var.less"],
   "syntax": "less"
 }

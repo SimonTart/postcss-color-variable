@@ -1,4 +1,4 @@
 {
-  "variableFiles": ["./color-var.less"],
-  "syntax": "less"
+  "variableFiles": ["./color-var.scss"],
+  "syntax": "scss"
 }

@@ -1,20 +1,19 @@
 /* eslint-disable prefer-let/prefer-let */
 const postcss = require('postcss')
 const fs = require('fs')
-const { cosmiconfigSync } = require('cosmiconfig')
 const path = require('path')
 
 const utils = require('./utils')
 const constant = require('./constant')
 
-const ConfigFileName = 'colorvar'
+const { explorerSync } = utils
+
 const DefaultConfig = {
   variableFiles: [],
   alias: {},
-  syntax: 'css'
+  syntax: constant.Syntax.less,
 }
 
-const explorerSync = cosmiconfigSync(ConfigFileName)
 
 function getPathFolder (filePath) {
   return fs.lstatSync(filePath).isFile() ? path.dirname(filePath) : filePath
@@ -100,8 +99,7 @@ module.exports = postcss.plugin('postcss-color-variable', (opts = {}) => {
   const config = getConfig(opts)
   const syntax = config.syntax
 
-  const colorToVar = utils.getColorMapFromFiles(config.variableFiles)
-
+  const colorToVar = utils.getColorMapFromFiles(config.variableFiles, syntax)
   return (root, result) => {
     const needFileMap = {}
     root.walkDecls(decl => {

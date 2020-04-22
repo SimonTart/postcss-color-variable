@@ -1,6 +1,6 @@
 {
   "name": "postcss-color-variable",
-  "version": "0.3.4",
+  "version": "0.4.1",
   "description": "PostCSS plugin color variable",
   "keywords": [
     "postcss",
@@ -21,7 +21,8 @@
     "cosmiconfig": "^6.0.0",
     "optionator": "^0.9.1",
     "postcss": "^7.0.18",
-    "postcss-less": "^3.1.4"
+    "postcss-less": "^3.1.4",
+    "postcss-scss": "^2.0.0"
   },
   "devDependencies": {
     "@logux/eslint-config": "^33.0.0",

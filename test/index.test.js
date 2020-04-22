@@ -2,12 +2,13 @@ const postcss = require('postcss')
 const path = require('path')
 const lessSyntax = require('postcss-less')
 
+const constant = require('../src/constant')
 const plugin = require('../src/index')
 
 async function run (input, output, opts) {
   const result = await postcss([plugin(opts)]).process(input, {
     from: undefined,
-    syntax: lessSyntax
+    syntax: constant.ParserMap[opts.syntax || constant.Syntax.less]
   })
   expect(result.content).toBe(output)
   expect(result.warnings()).toHaveLength(0)
@@ -58,7 +59,7 @@ a {
   background: @short-hex;
 }
     `, {
-        searchFrom: __dirname
+        searchFrom: path.resolve(__dirname, './less/index.less')
       })
   })
 })
@@ -292,6 +293,37 @@ a {
       },
       usingAlias: '@',
       sourcePath: path.resolve(__dirname, './src/index.less')
+    })
+  })
+
+  it('auto import file using absolute path when in sass', async () => {
+    const input = `
+@import "~@/sass/color-var.scss";
+a {
+  color: #ff0000;
+  background: #0a1;
+}
+    `
+    const output = `
+@import "~@/sass/color-var.scss";
+@import "~@/sass/color-var2.scss";
+a {
+  color: $red-color;
+  background: $short-hex;
+}
+    `
+    await run(input, output, {
+      syntax: constant.Syntax.scss,
+      autoImport: true,
+      variableFiles: [
+        path.resolve(__dirname, './sass/color-var.scss'),
+        path.resolve(__dirname, './sass/color-var2.scss')
+      ],
+      alias: {
+        '@': path.resolve(__dirname),
+      },
+      usingAlias: '@',
+      sourcePath: path.resolve(__dirname, './src/index.scss')
     })
   })
 })

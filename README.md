@@ -1,6 +1,6 @@
 # PostCSS Color Variable
 
-[PostCSS] plugin color variable. 替换颜色值为预定义的变量。目前只支持Less
+[PostCSS] plugin color variable. 替换颜色值为预定义的变量。只支持 Less 和 Sass
 
 [PostCSS]: https://github.com/postcss/postcss
 
@@ -33,7 +33,7 @@
 ```json
 {
   "variableFiles": ["./src/color.less"], // 定义颜色变量的文件
-  "syntax": "less", // 语法 less 目前只支持 less
+  "syntax": "less", // 语法，支持 less 和 scss 。默认 less
   "autoImport": "true", // 是否自动导入依赖的 variableFile
   "alias": {
     "@": "./src" // 等同于 webpack 中的alias
@@ -50,6 +50,9 @@
 npm install postcss-color-variable --save-dev
 # 通过命令替换
 ./node_modules/.bin/postcss-color-variable src/index.less
+
+# 可以通过 syntax 指定语法
+./node_modules/.bin/postcss-color-variable src/index.scss --syntax scss
 ```
 
 ### VSCode插件
